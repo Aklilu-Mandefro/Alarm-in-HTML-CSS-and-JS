@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer and Alarm Clock</title>
+    <link rel="stylesheet" href="./Font-Awesome-master/css/all.min.css">
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <script src="./js/jquery-3.6.0.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/script.js"></script>
+    <style>
+         :root {
+            --bs-success-rgb: 71, 222, 152 !important;
+        }
+        
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            font-family: Apple Chancery, cursive;
+        }
+        
+        .btn-info.text-light:hover,
+        .btn-info.text-light:focus {
+            background: #000;
+        }
+        
+        #search-suggestion {
+            position: absolute;
+            top: 2.4em;
+            left: 1em;
+            width: 90%;
+            z-index: 9;
+        }
+        
+        .fa.fa-alarm-clock {
+            position: relative;
+            min-width: 1.3em;
+        }
+        
+        .fa.fa-alarm-clock:before {
+            content: url(./ico/alarm-clock-svg.svg);
+            position: absolute;
+            width: 1.25em;
+            top: -0.9em;
+            left: 0;
+        }
+        
+        .blinks {
+            animation: blinker 1s linear infinite;
+            color: red;
+        }
+        
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+        
+        #alarm-list:empty:before {
+            content: 'No Alarm set.';
+        }
+        
+        #alarm-list:empty {
+            text-align: center;
+            color: rgb(214, 214, 214)
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-gradient" id="topNavBar">
+        <div class="container">
+            <a class="navbar-brand" href="https://volunteer-tech.com">
+           BY Aklilu Mandefro
+            </a>
+
+            <div>
+                <b class="text-light">Timer and Alarm Clock</b>
+            </div>
+        </div>
+    </nav>
+    <div class="container py-5 d-none" id="page-container">
+        <div class="d-flex justify-content-center align-items-center flex-column my-3">
+            <h1 class="fw-bolder" id="current_time">00:00:00 --</h1>
+            <h4 class="fw-bold" id="current_date">--- -- ----</h4>
+        </div>
+        <div class="text-center">
+            <button class="btn btn-primary rounded-0" type="button" id="set_timer"><i class="fa fa-clock"></i> Set Timer</button>
+            <button class="btn btn-info rounded-0" type="button" id="set_alarm"><i class="fa fa-alarm-clock"></i> Set Alarm</button>
+            <button class="btn btn-danger rounded-0 d-none" type="button" id="stop_alarm"><i class="fa fa-stop"></i> Stop Alarm</button>
+        </div>
+        <div class="row justify-content-center py-3">
+            <!-- Timer Field -->
+            <div class="col-md-4">
+                <div class="card rounded-0 shadow">
+                    <div class="card-header rounded-0  bg-dark bg-gradient text-light">
+                        <h5 class="card-title">
+                            Timer
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h1 class="text-center fw-bolder" id="timer">--:--</h1>
+                        <div class="text-center">
+                            <button class="btn btn-primary btn-sm rounded-0" id="start_timer" type="button"><i class="fa fa-play"></i> Start</button>
+                            <button class="btn btn-light border btn-sm rounded-0 d-none" id="pause_timer" type="button"><i class="fa fa-pause"></i> Pause</button>
+                            <button class="btn btn-danger btn-sm rounded-0 d-none" id="reset_timer" type="button"><i class="fa fa-reset"></i> Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End of Timer Field -->
+            <!-- Alarm List Field -->
+            <div class="col-md-4">
+                <div class="card rounded-0 shadow">
+                    <div class="card-header rounded-0  bg-dark bg-gradient text-light">
+                        <h5 class="card-title">
+                            Alarm List
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group" id="alarm-list"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- End if Alarm List Field -->
+        </div>
+    </div>
+    <div class="container py-5" id="default-container">
+        <h1 class="text-center mt">Welcome to Web-Based Alarm Clock and Timer Application</h1>
+        <hr>
+   
+        <center><button class="btn btn-lg btn-primary border col-4 rounded-pill" type="button" id="start_app"><i class="fa fa-arrow-right"></i> Let's Go</button></center>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="uniModal" tabindex="-1" aria-labelledby="uniModalLabel" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog  modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uniModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary rounded-0" onclick="$('#uniModal form').submit()">Save</button>
+                    <button type="button" class="btn btn-secondary rounded-0" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <noscript id="alarm-item-script">
+        <div class="list-group-item list-group-item-action alarm-item">
+            <div class="d-flex w-100">
+                <div class="col-auto flex-grow-1">
+                    <span class="alarm-text">12:00 PM</span>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-sm btn-danger delete-alarm"><i class="fa fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+    </noscript>
+    <noscript id="timer-form-script">
+        <div class="container-fluid">
+            <form action="" id="timer-form">
+                <input type="hidden" name="id" value="">
+                <div class="form-group">
+                    <label for="" class="control-label">Time (MM:ss)</label>
+                    <div class="input-group mb-3">
+                        <input type="number" min="0" name="minutes" class="form-control text-center" placeholder="MM" aria-label="Minutes" required>
+                        <span class="input-group-text">:</span>
+                        <input type="number" min="0" name="seconds" max="59" class="form-control text-center" placeholder="ss" aria-label="Seconds" required>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </noscript>
+    <noscript id="alarm-form-script">
+        <div class="container-fluid">
+            <form action="" id="alarm-form">
+                <input type="hidden" name="id" value="">
+                <div class="form-group">
+                    <label for="" class="control-label">Time (MM:ss)</label>
+                    <div class="input-group mb-3">
+                        <input type="number" name="hour" min="1" max="12" class="form-control" placeholder="MM" aria-label="Minutes" required>
+                        <span class="input-group-text">:</span>
+                        <input type="number" name="minutes" min="0" max="59" class="form-control" placeholder="ss" aria-label="Seconds" required>
+                        <span class="input-group-text"></span>
+                        <select class="form-select" name="meridein" id="meridein" required>
+                            <option>AM</option>
+                            <option>PM</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </noscript>
+</body>
+
+</html>
